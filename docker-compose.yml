@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGODB_URL=mongodb://mongodb:27017
+      - DATABASE_NAME=tree_db
+    depends_on:
+      - mongodb
+    restart: always
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    restart: always
+
+  test:
+    build: .
+    command: pytest 
+    environment:
+      - MONGODB_URL=mongodb://mongodb:27017
+      - DATABASE_NAME=test_tree_db
+    depends_on:
+      - mongodb
+    volumes:
+      - .:/app
+    restart: "no"
+    
+
+volumes:
+  mongodb_data:
