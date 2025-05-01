@@ -52,6 +52,7 @@
 
 - Docker
 - Git
+- The API's require a key for authentication, which is sent over secure email.
 
 ### Installation & Setup
 
@@ -168,43 +169,6 @@ Run the comprehensive test suite:
 # Run all tests
 docker compose run test
 
-
-## 📂 Project Structure
-
-```
-.
-├── app/                    # Application core
-│   ├── __init__.py         # Package initialization
-│   ├── auth.py             # Authentication and security
-│   ├── db.py               # Database connection & operations
-│   ├── main.py             # FastAPI application entry point
-│   ├── models.py           # Pydantic data models
-│   ├── routes.py           # API routes and handlers
-│   └── tree_service.py     # Business logic for tree operations
-│
-├── tests/                  # Test suite
-│   │
-│   ├── integration/        # Integration tests
-│   │   ├── __init__.py     # Integration tests package initialization
-│   │   └── test_api.py     # API endpoint tests
-│   │
-│   ├── unit/               # Unit tests
-│   │   ├── __init__.py     # Unit tests package initialization
-│   │   ├── test_db.py      # Database unit tests
-│   │   └── test_tree_service.py # Tree service unit tests
-│   │
-│   ├── __init__.py         # Test package initialization
-│   └── conftest.py         # Test configuration
-│
-├── .env                    # Environment variables
-├── .gitignore              # Git ignore patterns
-├── docker-compose.yml      # Docker Compose configuration
-├── Dockerfile              # Docker configuration
-├── LICENSE                 # Project license file
-├── pytest.ini              # Pytest configuration
-├── README.md               # Project documentation
-└── requirements.txt        # Python dependencies
-```
 
 ## 🚀 Deployment
 
