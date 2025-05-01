@@ -59,7 +59,7 @@
 ```bash
 # Clone the repository
 git clone https://github.com/AdityaBandaru06/Theary.git
-cd tree-api
+cd Theary
 
 # Start the application using Docker Compose
 docker compose up -d
