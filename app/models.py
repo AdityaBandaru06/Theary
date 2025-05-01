@@ -1,6 +1,6 @@
 # app/models.py
 from typing import List, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 class NodeCreate(BaseModel):
     """Model for creating a new node."""

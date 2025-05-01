@@ -1,10 +1,13 @@
-# tests/integration/test_api.py
 import pytest
 from fastapi.testclient import TestClient
 from httpx import AsyncClient
 import asyncio
+import os
 from app.main import app
 from app.db import initialize_db, nodes_collection, counters_collection
+
+# Get API key from environment variable
+API_KEY = os.getenv("API_KEY", "default_development_api_key_change_this_in_production")
 
 @pytest.fixture
 async def setup_test_db():
@@ -29,13 +32,23 @@ async def async_client():
     async with AsyncClient(app=app, base_url="http://test") as client:
         yield client
 
+@pytest.fixture
+async def auth_client():
+    """Get a client with API key authentication."""
+    async with AsyncClient(
+        app=app, 
+        base_url="http://test",
+        headers={"X-API-Key": API_KEY}
+    ) as client:
+        yield client
+
 @pytest.mark.asyncio
-async def test_get_trees_endpoint(setup_test_db, async_client):
+async def test_get_trees_endpoint(setup_test_db, auth_client):
     # Set up test data
     # The initialize_db function already creates a root node
     
     # Make request to get trees
-    response = await async_client.get("/api/tree")
+    response = await auth_client.get("/api/tree")
     
     # Check response
     assert response.status_code == 200
@@ -53,9 +66,15 @@ async def test_get_trees_endpoint(setup_test_db, async_client):
     assert isinstance(root["children"], list)
 
 @pytest.mark.asyncio
-async def test_create_node_endpoint(setup_test_db, async_client):
-    # First get the current trees to find a root node id
+async def test_get_trees_unauthorized(setup_test_db, async_client):
+    """Test that unauthorized requests are rejected."""
     response = await async_client.get("/api/tree")
+    assert response.status_code == 403  # Forbidden
+
+@pytest.mark.asyncio
+async def test_create_node_endpoint(setup_test_db, auth_client):
+    # First get the current trees to find a root node id
+    response = await auth_client.get("/api/tree")
     trees = response.json()
     root_id = trees[0]["id"]
     
@@ -65,7 +84,7 @@ async def test_create_node_endpoint(setup_test_db, async_client):
         "parentId": root_id
     }
     
-    response = await async_client.post("/api/tree", json=node_data)
+    response = await auth_client.post("/api/tree", json=node_data)
     
     # Check response
     assert response.status_code == 201
@@ -81,7 +100,7 @@ async def test_create_node_endpoint(setup_test_db, async_client):
         "parentId": 9999
     }
     
-    response = await async_client.post("/api/tree", json=invalid_node_data)
+    response = await auth_client.post("/api/tree", json=invalid_node_data)
     assert response.status_code == 404
     
     # Test creating a new root node
@@ -89,12 +108,19 @@ async def test_create_node_endpoint(setup_test_db, async_client):
         "label": "New Root"
     }
     
-    response = await async_client.post("/api/tree", json=root_node_data)
+    response = await auth_client.post("/api/tree", json=root_node_data)
     assert response.status_code == 201
     
     # Get trees again to verify our additions
-    response = await async_client.get("/api/tree")
+    response = await auth_client.get("/api/tree")
     updated_trees = response.json()
     
     # Should have at least two root nodes now
     assert len(updated_trees) >= 2
+    
+@pytest.mark.asyncio
+async def test_health_check(async_client):
+    """Test the public health check endpoint."""
+    response = await async_client.get("/api/health")
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}

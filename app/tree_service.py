@@ -8,9 +8,6 @@ async def build_tree() -> List[NodeTree]:
     # Get all nodes from database
     nodes = await get_all_nodes()
     
-    # Create a dictionary of nodes by ID for O(1) lookup
-    nodes_dict = {node["id"]: node for node in nodes}
-    
     # Initialize a dictionary to hold the tree structure
     tree_dict = {}
     
